@@ -15,8 +15,8 @@ class MQ5Converter {
         // Generate random 6-digit magic number
         const magicNumber = Math.floor(100000 + Math.random() * 900000);
 
-        const buyConditions = this.parser.parseRules(buy_rules, 'mql');
-        const sellConditions = this.parser.parseRules(sell_rules, 'mql');
+        const buyConditions = this.parser.parseRules(buy_rules, 'mq5');
+        const sellConditions = this.parser.parseRules(sell_rules, 'mq5');
 
         return `//+------------------------------------------------------------------+
 //|                                           Strategy_${symbol}.mq5 |
@@ -279,10 +279,7 @@ void DisplayChartInfo()
 //+------------------------------------------------------------------+
 bool CheckBuySignal()
 {
-    return (${buyConditions.map(c => c.replace(/Open\[(\d+)\]/g, 'iOpen(_Symbol, PERIOD_CURRENT, $1)')
-            .replace(/High\[(\d+)\]/g, 'iHigh(_Symbol, PERIOD_CURRENT, $1)')
-            .replace(/Low\[(\d+)\]/g, 'iLow(_Symbol, PERIOD_CURRENT, $1)')
-            .replace(/Close\[(\d+)\]/g, 'iClose(_Symbol, PERIOD_CURRENT, $1)')).join(' &&\n            ')});
+    return (${buyConditions.join(' &&\n            ')});
 }
 
 //+------------------------------------------------------------------+
@@ -290,10 +287,7 @@ bool CheckBuySignal()
 //+------------------------------------------------------------------+
 bool CheckSellSignal()
 {
-    return (${sellConditions.map(c => c.replace(/Open\[(\d+)\]/g, 'iOpen(_Symbol, PERIOD_CURRENT, $1)')
-                .replace(/High\[(\d+)\]/g, 'iHigh(_Symbol, PERIOD_CURRENT, $1)')
-                .replace(/Low\[(\d+)\]/g, 'iLow(_Symbol, PERIOD_CURRENT, $1)')
-                .replace(/Close\[(\d+)\]/g, 'iClose(_Symbol, PERIOD_CURRENT, $1)')).join(' &&\n            ')});
+    return (${sellConditions.join(' &&\n            ')});
 }
 
 //+------------------------------------------------------------------+

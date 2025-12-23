@@ -166,12 +166,14 @@ void ManagePosition()
     {
         if(orderType == OP_BUY && CheckSellSignal())
         {
-            OrderClose(OrderTicket(), OrderLots(), Bid, Slippage, clrRed);
+            if(!OrderClose(OrderTicket(), OrderLots(), Bid, Slippage, clrRed))
+                Print("Error closing buy order: ", GetLastError());
             return;
         }
         else if(orderType == OP_SELL && CheckBuySignal())
         {
-            OrderClose(OrderTicket(), OrderLots(), Ask, Slippage, clrGreen);
+            if(!OrderClose(OrderTicket(), OrderLots(), Ask, Slippage, clrGreen))
+                Print("Error closing sell order: ", GetLastError());
             return;
         }
     }
@@ -195,7 +197,8 @@ void ManagePosition()
             if((orderType == OP_BUY && newSL > orderSL) ||
                (orderType == OP_SELL && (orderSL == 0 || newSL < orderSL)))
             {
-                OrderModify(OrderTicket(), orderOpenPrice, newSL, orderTP, 0, clrBlue);
+                if(!OrderModify(OrderTicket(), orderOpenPrice, newSL, orderTP, 0, clrBlue))
+                    Print("Error modifying order for breakeven: ", GetLastError());
             }
         }
     }
@@ -215,7 +218,8 @@ void ManagePosition()
             if((orderType == OP_BUY && newSL > orderSL) ||
                (orderType == OP_SELL && (orderSL == 0 || newSL < orderSL)))
             {
-                OrderModify(OrderTicket(), orderOpenPrice, newSL, orderTP, 0, clrBlue);
+                if(!OrderModify(OrderTicket(), orderOpenPrice, newSL, orderTP, 0, clrBlue))
+                    Print("Error modifying order for trailing stop: ", GetLastError());
             }
         }
     }

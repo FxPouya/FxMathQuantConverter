@@ -2,57 +2,50 @@
 class RuleParser {
     constructor() {
         this.operators = {
-            '<': { mql: '<', pine: '<' },
-            '>': { mql: '>', pine: '>' },
-            '<=': { mql: '<=', pine: '<=' },
-            '>=': { mql: '>=', pine: '>=' },
-            '==': { mql: '==', pine: '==' },
-            '!=': { mql: '!=', pine: '!=' }
+            '<': { mql: '<', pine: '<', csharp: '<' },
+            '>': { mql: '>', pine: '>', csharp: '>' },
+            '<=': { mql: '<=', pine: '<=', csharp: '<=' },
+            '>=': { mql: '>=', pine: '>=', csharp: '>=' },
+            '==': { mql: '==', pine: '==', csharp: '==' },
+            '!=': { mql: '!=', pine: '!=', csharp: '!=' }
         };
 
         this.priceTypes = {
-            'OPEN': { mql: 'Open', pine: 'open' },
-            'HIGH': { mql: 'High', pine: 'high' },
-            'LOW': { mql: 'Low', pine: 'low' },
-            'CLOSE': { mql: 'Close', pine: 'close' }
+            'OPEN': { mql: 'Open', pine: 'open', csharp: 'Open' },
+            'HIGH': { mql: 'High', pine: 'high', csharp: 'High' },
+            'LOW': { mql: 'Low', pine: 'low', csharp: 'Low' },
+            'CLOSE': { mql: 'Close', pine: 'close', csharp: 'Close' }
         };
     }
 
     parseRule(rule, platform = 'mql') {
-        // Parse rule like "OPEN[1] < CLOSE[6]"
-        const regex = /(\w+)\[(\d+)\]\s*([<>=!]+)\s*(\w+)\[(\d+)\]/;
-        const match = rule.match(regex);
+        // Handle complex expressions with parentheses and math operations
+        // Example: "(OPEN[4] - LOW[8]) <= (CLOSE[8] - OPEN[3])"
 
-        if (!match) {
-            console.error('Invalid rule format:', rule);
-            return '';
+        let parsedRule = rule;
+
+        // Replace price references based on platform
+        for (const [priceType, platformMap] of Object.entries(this.priceTypes)) {
+            // Match patterns like OPEN[1], HIGH[2], etc.
+            const regex = new RegExp(`${priceType}\\[(\\d+)\\]`, 'g');
+
+            parsedRule = parsedRule.replace(regex, (match, offset) => {
+                if (platform === 'mql') {
+                    // MQ4 style - array indexing
+                    return `${platformMap.mql}[${offset}]`;
+                } else if (platform === 'mq5') {
+                    // MQ5 style - use iOpen/iHigh/iLow/iClose functions
+                    const funcName = `i${platformMap.mql}`;
+                    return `${funcName}(_Symbol, PERIOD_CURRENT, ${offset})`;
+                } else if (platform === 'pine') {
+                    return offset === '0' ? platformMap.pine : `${platformMap.pine}[${offset}]`;
+                } else if (platform === 'csharp') {
+                    return `MarketSeries.${platformMap.csharp}.Last(${offset})`;
+                }
+            });
         }
 
-        const [, leftPrice, leftOffset, operator, rightPrice, rightOffset] = match;
-
-        if (platform === 'mql') {
-            return this.toMQL(leftPrice, leftOffset, operator, rightPrice, rightOffset);
-        } else if (platform === 'pine') {
-            return this.toPine(leftPrice, leftOffset, operator, rightPrice, rightOffset);
-        }
-    }
-
-    toMQL(leftPrice, leftOffset, operator, rightPrice, rightOffset) {
-        const left = `${this.priceTypes[leftPrice].mql}[${leftOffset}]`;
-        const right = `${this.priceTypes[rightPrice].mql}[${rightOffset}]`;
-        const op = this.operators[operator].mql;
-        return `${left} ${op} ${right}`;
-    }
-
-    toPine(leftPrice, leftOffset, operator, rightPrice, rightOffset) {
-        const left = leftOffset === '0'
-            ? this.priceTypes[leftPrice].pine
-            : `${this.priceTypes[leftPrice].pine}[${leftOffset}]`;
-        const right = rightOffset === '0'
-            ? this.priceTypes[rightPrice].pine
-            : `${this.priceTypes[rightPrice].pine}[${rightOffset}]`;
-        const op = this.operators[operator].pine;
-        return `${left} ${op} ${right}`;
+        return parsedRule;
     }
 
     parseRules(rules, platform = 'mql') {
@@ -60,7 +53,7 @@ class RuleParser {
     }
 
     combineRules(parsedRules, platform = 'mql') {
-        if (platform === 'mql' || platform === 'csharp') {
+        if (platform === 'mql' || platform === 'mq5' || platform === 'csharp') {
             return parsedRules.join(' && ');
         } else if (platform === 'pine') {
             return parsedRules.join(' and ');
