@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strategy Converter - MQ4/MQ5/Pine Script</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <div class="container">
+        <header class="header">
+            <h1 class="title">
+                <span class="gradient-text">Strategy Converter</span>
+            </h1>
+            <p class="subtitle">Convert JSON strategies to MQ4, MQ5 & Pine Script with comprehensive performance reports
+            </p>
+        </header>
+
+        <main class="main-content">
+            <!-- Drop Zone -->
+            <section class="drop-zone-section">
+                <div id="dropZone" class="drop-zone">
+                    <div class="drop-zone-content">
+                        <svg class="drop-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                        <h2>Drop Strategy JSON Here</h2>
+                        <p>or click to browse files</p>
+                        <input type="file" id="fileInput" accept=".json" hidden>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Strategy Info -->
+            <section id="strategyInfo" class="strategy-info hidden">
+                <div class="info-card">
+                    <h3>Strategy Information</h3>
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <span class="info-label">Symbol:</span>
+                            <span id="infoSymbol" class="info-value">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Total Trades:</span>
+                            <span id="infoTrades" class="info-value">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Win Rate:</span>
+                            <span id="infoWinRate" class="info-value">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Profit Factor:</span>
+                            <span id="infoProfitFactor" class="info-value">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">ATR Period:</span>
+                            <span id="infoATR" class="info-value">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">SL Multiplier:</span>
+                            <span id="infoSL" class="info-value">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">TP Multiplier:</span>
+                            <span id="infoTP" class="info-value">-</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Total Profit:</span>
+                            <span id="infoProfit" class="info-value">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <button id="btnMQ4" class="btn btn-primary">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                        </svg>
+                        Generate MQ4
+                    </button>
+                    <button id="btnMQ5" class="btn btn-primary">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                        </svg>
+                        Generate MQ5
+                    </button>
+                    <button id="btnPine" class="btn btn-primary">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                        </svg>
+                        Generate Pine Script
+                    </button>
+                    <button id="btnCTrader" class="btn btn-primary">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                        </svg>
+                        Generate cTrader
+                    </button>
+                    <button id="btnReport" class="btn btn-accent">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 3h18v18H3z"></path>
+                            <path d="M3 9h18M9 21V9"></path>
+                        </svg>
+                        Generate Report
+                    </button>
+                </div>
+            </section>
+
+            <!-- Report Viewer -->
+            <section id="reportSection" class="report-section hidden">
+                <div class="report-header">
+                    <h3>Performance Report</h3>
+                    <button id="btnDownloadReport" class="btn btn-small">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        Download Report
+                    </button>
+                </div>
+                <div id="reportContent" class="report-content"></div>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <p>&copy; 2025 FxMath Quant | Strategy Converter</p>
+        </footer>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/utils/rule-parser.js"></script>
+    <script src="js/utils/download.js"></script>
+    <script src="js/converters/mq4-converter.js"></script>
+    <script src="js/converters/mq5-converter.js"></script>
+    <script src="js/converters/pine-converter.js"></script>
+    <script src="js/converters/ctrader-converter.js"></script>
+    <script src="js/analytics.js"></script>
+    <script src="js/chart-renderer.js"></script>
+    <script src="js/report-generator.js"></script>
+    <script src="js/main.js"></script>
+</body>
+
+</html>
